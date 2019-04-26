@@ -1,8 +1,8 @@
-var express = require("express");
-var request = require("request");
-var cheerio = require("cheerio");
-var Comment = require("../models/Comment.js");
-var Article = require("../models/Article.js");
+var express = require( "express" );
+var request = require( "request" );
+var cheerio = require( "cheerio" );
+var Comment = require( "../models/Note.js" );
+var Article = require( "../models/Article.js" );
 var router = express.Router();
 
 
@@ -24,7 +24,7 @@ router.get( "/scrape", function( req, res ) {
       // result.title saves entire <a> tag as it appears on NPR website
       result.title = $( element ).children( "div.item-info" ).children( "h2.title" ).html();
       // result.description saves text description
-	  result.description = $( element ).children( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
+	    result.summary = $( element ).children( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
       
       // Using our Article model, create a new entry
       var entry = new Article( result );
