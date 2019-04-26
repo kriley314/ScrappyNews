@@ -1,5 +1,5 @@
 var express = require( "express" );
-var bodyParser = require("body-parser");
+var bodyParser = require( "body-parser" );
 var mongoose = require( "mongoose" );
 var exphbs = require( "express-handlebars" );
 var logger = require( "morgan" );
@@ -37,7 +37,7 @@ app.use( "/", articleRouter );
 app.use( express.static( "public" ));
 
 // Database configuration with mongoose
-var URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/news-scraper'; 
+var URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/mongoHeadlines'; 
 mongoose.connect( URI );
 var db = mongoose.connection;
 
@@ -52,7 +52,7 @@ db.once( "open", function() {
 });
 
 // Listen on port 3000
-app.listen(port, function() {
+app.listen( PORT, function() {
   console.log( "App running on port 3000!" );
 });
 

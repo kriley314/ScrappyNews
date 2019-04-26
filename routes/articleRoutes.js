@@ -11,6 +11,7 @@ var router = express.Router();
 // Scrape data from NPR website and save to mongodb
 router.get( "/scrape", function( req, res ) {
   // Grab the body of the html with request
+console.log( "Here startng to scrape.." );
   request( "http://www.npr.org/sections/news/archive", function( error, response, html ) {
     // Load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load( html );
@@ -22,9 +23,11 @@ router.get( "/scrape", function( req, res ) {
 
       // Get the title and description of every article, and save them as properties of the result object
       // result.title saves entire <a> tag as it appears on NPR website
-      result.title = $( element ).children( "div.item-info" ).children( "h2.title" ).html();
+      result.title = $( element ).find( "div.item-info" ).children( "h2.title" ).children( "a" ).text();
       // result.description saves text description
-	    result.summary = $( element ).children( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
+	    result.summary = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
+      // result.link saves text description
+	    result.link = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).attr( "href" );
       
       // Using our Article model, create a new entry
       var entry = new Article( result );
@@ -87,8 +90,8 @@ router.post( "/save/:id", function( req, res ) {
 router.get( "/articles/:id", function( req, res ) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
   Article.findOne({ "_id": req.params.id })
-  // ..and populate all of the comments associated with it
-  .populate( "comments" )
+  // ..and populate all of the notes associated with it
+  .populate( "notes" )
   // now, execute our query
   .exec( function( error, doc ) {
     // Log any errors
@@ -102,12 +105,12 @@ router.get( "/articles/:id", function( req, res ) {
   });
 });
 
-// Create a new comment
-router.post( "/comment/:id", function( req, res ) {
-  // Create a new comment and pass the req.body to the entry
-  var newComment = new Comment( req.body );
-  // And save the new comment the db
-  newComment.save( function( error, newComment ) {
+// Create a new note
+router.post( "/note/:id", function( req, res ) {
+  // Create a new note and pass the req.body to the entry
+  var newNote = new Note( req.body );
+  // And save the new note the db
+  newNote.save( function( error, newNote ) {
     // Log any errors
     if ( error ) {
       console.log( error );
@@ -115,7 +118,7 @@ router.post( "/comment/:id", function( req, res ) {
     // Otherwise
     else {
       // Use the article id to find and update it's comment
-      Article.findOneAndUpdate({ "_id": req.params.id }, { $push: { "comments": newComment._id }}, { new: true })
+      Article.findOneAndUpdate({ "_id": req.params.id }, { $push: { "notes": newNote._id }}, { new: true })
       // Execute the above query
       .exec( function( err, doc ) {
         // Log any errors
