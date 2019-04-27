@@ -22,31 +22,6 @@ function getResults() {
 // Runs the getResults function as soon as the script is executed
 getResults();
 
-// When the #make-new button is clicked
-$( document ).on( "click", "#make-new", function() {
-  // AJAX POST call to the submit route on the server
-  // This will take the data from the form and send it to the server
-  $.ajax({
-    type: "POST",
-    dataType: "json",
-    url: "/submit",
-    data: {
-      title: $( "#title" ).val(),
-      note: $( "#note" ).val(),
-      created: Date.now()
-    }
-  })
-  // If that API call succeeds, add the title and a delete button for the note to the page
-    .then( function( data ) {
-    // Add the title and delete button to the #results section
-      $( "#results" ).prepend( "<p class='data-entry' data-id=" + data._id + "><span class='dataTitle' data-id=" +
-      data._id + ">" + data.title + "</span><span class=delete>X</span></p>" );
-      // Clear the note and title inputs on the page
-      $( "#note" ).val( "" );
-      $( "#title" ).val( "" );
-    });
-});
-
 // When the #clear-all button is pressed
 $( "#clear-all" ).on( "click", function() {
   // Make an AJAX GET request to delete the notes from the db
@@ -62,25 +37,22 @@ $( "#clear-all" ).on( "click", function() {
 });
 
 
-// When user clicks the delete button for a note
+// When user clicks the delete button for an article
 $( document ).on( "click", ".delete", function() {
   // Save the p tag that encloses the button
   var selected = $( this ).parent();
-  // Make an AJAX GET request to delete the specific note
-  // this uses the data-id of the p-tag, which is linked to the specific note
+console.log( "Trying to delete.." + selected );
+  // Make an AJAX GET request to delete the specific article
+  // this uses the data-id of the p-tag, which is linked to the specific aticle
   $.ajax({
-    type: "GET",
+    type: "POST",
     url: "/delete/" + selected.attr( "data-id" ),
 
     // On successful call
     success: function( response ) {
       // Remove the p-tag from the DOM
       selected.remove();
-      // Clear the note and title inputs
-      $( "#note" ).val( "" );
-      $( "#title" ).val( "" );
-      // Make sure the #action-button is submit (in case it's update)
-      $( "#action-button" ).html( "<button id='make-new'>Submit</button>" );
+      getResults();
     }
   });
 });

@@ -17,7 +17,6 @@ var router = express.Router();
 // Scrape data from NPR website and save to mongodb
 router.get( "/scrape", function( req, res ) {
   // Grab the body of the html with request
-console.log( "Here startng to scrape.." );
   axios.get( "http://www.npr.org/sections/news/archive" ).then( function( response ) {
     // Load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load( response.data );
@@ -40,8 +39,6 @@ console.log( "Here startng to scrape.." );
 
       // Using our Article model, create a new entry
       var entry = new Article( result );
-
-  console.log( "Created the Article entry for the DB." );
   
       // Now, save that entry to the db
       entry.save( function( err, doc ) {
@@ -77,7 +74,25 @@ router.get( "/articles", function( req, res ) {
 // Save an article
 router.post( "/save/:id", function( req, res ) {
   // Use the article id to find and update it's saved property to true
-  Article.findOneAndUpdate({ "_id": req.params.id }, { "saved": true })
+  Article.findOneAndUpdate({ "_id": req.params.id })
+  // Execute the above query
+  .exec( function( err, doc ) {
+    // Log any errors
+    if ( err ) {
+      console.log( err );
+    }
+    // Log result
+    else {
+      console.log( "doc: ", doc );
+    }
+  });
+});
+
+// Delete an article
+router.post( "/delete/:id", function( req, res ) {
+  // Use the article id to find and delete it's saved property to true
+console.log( "Made it into the delete function!!" + req.params.id );
+  Article.deleteOne({ "_id": req.params.id })
   // Execute the above query
   .exec( function( err, doc ) {
     // Log any errors
