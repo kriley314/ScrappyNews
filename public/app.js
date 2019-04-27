@@ -7,14 +7,22 @@ function getResults() {
   // Empty any results currently on the page
   $( "#scrape-results" ).empty();
 
-  // Grab all of the current articles
-  $.getJSON( "/articles", function( data ) {
+  // Do a fresh scrape to the NPR site..
+  $.getJSON( "/scrape", function( data ) {
     // For each article...
     for ( var i = 0; i < data.length; i++ ) {
-      // ...populate #results with a p-tag that includes the article's title and info followed by a link for the article itself.
-      $( "#scrape-results" ).prepend("<p class='data-entry' data-id=" + data[ i ]._id + "><span class='dataTitle' data-id=" +
-        data[ i ]._id + ">" + data[ i ].title + "       " + "</span><span class=delete>X</span></p>" + "\r\n" +
-        "<a href=" + data[ i ].link + "target='_blank'>Article Link</a>" );
+      // ...populate #results with a p-tag that includes the article's title and info followed by a link for the article
+      // itself.  Side note:  Saving for later.. I have the deleteX span here.  It doesn't belong here - the scrape entries
+      // are for "show".  After they have saved ones, THOSE can be deleted.
+      $( "#scrape-results" ).append("<p class='data-entry' data-id=" + data[ i ]._id + "><span class='dataTitle' data-id=" +
+        data[ i ]._id + ">" + data[ i ].title + "&nbsp&nbsp&nbsp<a href=" + data[ i ].link + "target='_blank'>Article Link</a>" +
+        "&nbsp&nbsp&nbsp<button class='save-article button is-info is-small' data-id='" + data[ i ]._id + "'>" +
+        "Save Article</button></p>" );
+        
+
+//      $( "#scrape-results" ).append("<p class='data-entry' data-id=" + data[ i ]._id + "><span class='dataTitle' data-id=" +
+//        data[ i ]._id + ">" + data[ i ].title + "       " + "</span><span class=delete>X</span></p>" + "\r\n" +
+//        "<a href=" + data[ i ].link + "target='_blank'>Article Link</a>" );
     }
   });
 }

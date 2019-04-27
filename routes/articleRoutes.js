@@ -14,19 +14,29 @@ var router = express.Router();
 
 // ============= ROUTES FOR HOME PAGE =============//
 
-// Scrape data from NPR website and save to mongodb
+// Scrape data from NPR website and send it bck to be shown on the home page.
 router.get( "/scrape", function( req, res ) {
   // Grab the body of the html with request
   axios.get( "http://www.npr.org/sections/news/archive" ).then( function( response ) {
     // Load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load( response.data );
+    var results = [];
 
-    // Grab every part of the html that contains a separate article
+    // Grab every part of the html that contains a separate article.  We will take the pieces we
+    // want and build up an array to be shown to the user to allow them to pick, save, and comment on.
     $( "div.archivelist > article" ).each( function( i, element ) {
+      var title = $( element ).find( "div.item-info" ).children( "h2.title" ).children( "a" ).text();
+      var summary = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
+      var link = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).attr( "href" );
 
-      // Save an empty result object
-      var result = {};
+console.log( "Pushing: " + title + ":" + summary + ":" + link + "into results.." );
 
+      results.push({
+        title: title,
+        summary: summary,
+        link: link
+      });
+/*
       // Get the title and description of every article, and save them as properties of the result object
       // result.title saves entire <a> tag as it appears on NPR website
       result.title = $( element ).find( "div.item-info" ).children( "h2.title" ).children( "a" ).text();
@@ -50,16 +60,16 @@ router.get( "/scrape", function( req, res ) {
         else {
           console.log( doc );
         }
-      });
+      });  */
     });
 
     // Reload the page so that newly scraped articles will be shown on the page
-    res.send( "Scape complete" );
+    res.json( results );
   });  
 });
 
 // This will get the articles we scraped from the mongoDB
-router.get( "/articles", function( req, res ) {
+router.get( "/saved", function( req, res ) {
   // Ask mongoose for all your Article data..
   db.Article.find({})
     .then( function( dbArticle ) {
@@ -91,7 +101,6 @@ router.post( "/save/:id", function( req, res ) {
 // Delete an article
 router.post( "/delete/:id", function( req, res ) {
   // Use the article id to find and delete it's saved property to true
-console.log( "Made it into the delete function!!" + req.params.id );
   Article.deleteOne({ "_id": req.params.id })
   // Execute the above query
   .exec( function( err, doc ) {

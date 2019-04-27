@@ -12,7 +12,7 @@ $( document ).ready( function() {
 	  // For each one
 	  for ( var i = 0; i < data.length; i++ ) {
 	    // Display the information on the page
-	    $( "#scrape-results" ).prepend( "<div class='result-div'><p class='result-text'>" + data[ i ].title + "<br>" + data[ i ].description +
+	    $( "#scrape-results" ).append( "<div class='result-div'><p class='result-text'>" + data[ i ].title + "<br>" + data[ i ].description +
 	    	"</p><button class='save-article button is-info is-medium' data-id='" + data[ i ]._id + "'><span class='icon'><i class='fa fa-bookmark'></i></span>Save Article</button></div>" );
 	  }
 	});
