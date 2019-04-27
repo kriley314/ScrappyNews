@@ -1,6 +1,9 @@
 var express = require( "express" );
 var exphbs = require( "express-handlebars" );
 
+// Require all models
+var db = require( "../models" );
+
 var router = express.Router();
 
 router.get( "/", ( req, res ) => {

@@ -1,10 +1,16 @@
 var express = require( "express" );
-var request = require( "request" );
+//var request = require( "request" );
+var logger = require( "morgan" );
+var mongoose = require( "mongoose" );
+var axios = require( "axios" );
 var cheerio = require( "cheerio" );
-var Comment = require( "../models/Note.js" );
-var Article = require( "../models/Article.js" );
-var router = express.Router();
 
+// Require all models
+var db = require( "../models" );
+var Article = require( "../models/Article.js" );
+var Comment = require( "../models/Note.js" );
+
+var router = express.Router();
 
 // ============= ROUTES FOR HOME PAGE =============//
 
@@ -12,9 +18,10 @@ var router = express.Router();
 router.get( "/scrape", function( req, res ) {
   // Grab the body of the html with request
 console.log( "Here startng to scrape.." );
-  request( "http://www.npr.org/sections/news/archive", function( error, response, html ) {
+  axios.get( "http://www.npr.org/sections/news/archive" ).then( function( response ) {
     // Load that into cheerio and save it to $ for a shorthand selector
-    var $ = cheerio.load( html );
+    var $ = cheerio.load( response.data );
+
     // Grab every part of the html that contains a separate article
     $( "div.archivelist > article" ).each( function( i, element ) {
 
@@ -27,11 +34,15 @@ console.log( "Here startng to scrape.." );
       // result.description saves text description
 	    result.summary = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
       // result.link saves text description
-	    result.link = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).attr( "href" );
+      result.link = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).attr( "href" );
       
+      console.log( result );
+
       // Using our Article model, create a new entry
       var entry = new Article( result );
 
+  console.log( "Created the Article entry for the DB." );
+  
       // Now, save that entry to the db
       entry.save( function( err, doc ) {
         // Log any errors
@@ -46,25 +57,21 @@ console.log( "Here startng to scrape.." );
     });
 
     // Reload the page so that newly scraped articles will be shown on the page
-    res.redirect( "/" );
+    res.send( "Scape complete" );
   });  
 });
 
 // This will get the articles we scraped from the mongoDB
 router.get( "/articles", function( req, res ) {
-  // Grab every doc in the Articles array
-  Article.find({})
-  // Execute the above query
-  .exec( function( err, doc ) {
-    // Log any errors
-    if ( err ) {
-      console.log( error );
-    }
-    // Or send the doc to the browser as a json object
-    else {
-      res.json( doc );
-    }
-  });
+  // Ask mongoose for all your Article data..
+  db.Article.find({})
+    .then( function( dbArticle ) {
+      res.json( dbArticle );
+    })
+    .catch( function( err ) {
+      // If an error has occurred, send it to the client..
+      res.json( err );
+    });
 });
 
 // Save an article
