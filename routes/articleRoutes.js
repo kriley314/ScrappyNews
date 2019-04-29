@@ -29,8 +29,6 @@ router.get( "/scrape", function( req, res ) {
       var summary = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).text();
       var link = $( element ).find( "div.item-info" ).children( "p.teaser" ).children( "a" ).attr( "href" );
 
-console.log( "Pushing: " + title + ":" + summary + ":" + link + "into results.." );
-
       results.push({
         title: title,
         summary: summary,

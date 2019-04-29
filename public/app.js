@@ -9,16 +9,18 @@ function getResults() {
 
   // Do a fresh scrape to the NPR site..
   $.getJSON( "/scrape", function( data ) {
-    // For each article...
+   // For each article...
     for ( var i = 0; i < data.length; i++ ) {
       // ...populate #results with a p-tag that includes the article's title and info followed by a link for the article
       // itself.  Side note:  Saving for later.. I have the deleteX span here.  It doesn't belong here - the scrape entries
       // are for "show".  After they have saved ones, THOSE can be deleted.
-      $( "#scrape-results" ).append("<p class='data-entry' data-id=" + data[ i ]._id + "><span class='dataTitle' data-id=" +
-        data[ i ]._id + ">" + data[ i ].title + "&nbsp&nbsp&nbsp<a href=" + data[ i ].link + "target='_blank'>Article Link</a>" +
-        "&nbsp&nbsp&nbsp<button class='save-article button is-info is-small' data-id='" + data[ i ]._id + "'>" +
-        "Save Article</button></p>" );
-        
+      $( "#scrape-results" ).append( "<hr><p class='data-entry'><span class='dataTitle'>" + data[ i ].title + "</span>" + 
+         "<button class='save-article button is-info is-small'" + 
+         " title='" + data[ i ].title +
+         "' summary='" + data[ i ].summary +
+         "' link='" + data[ i ].link + "'>Save Article</button>" + "<br>" +
+         "<span class='dataSummary'>" + data[ i ].summary + "</span>" + "&nbsp&nbsp&nbsp" +
+         "<a href=" + data[ i ].link + "target='_blank'>Article Link</a></p>"  );
 
 //      $( "#scrape-results" ).append("<p class='data-entry' data-id=" + data[ i ]._id + "><span class='dataTitle' data-id=" +
 //        data[ i ]._id + ">" + data[ i ].title + "       " + "</span><span class=delete>X</span></p>" + "\r\n" +
@@ -30,13 +32,19 @@ function getResults() {
 // Runs the getResults function as soon as the script is executed
 getResults();
 
-// When the #clear-all button is pressed
-$( "#clear-all" ).on( "click", function() {
-  // Make an AJAX GET request to delete the notes from the db
+// When the Save Article button is pressed
+//$( "#save-article" ).on( "click", function() {
+$( document ).on( "click", ".save-article", function() {
+debugger;
+  var selected = $( this );
+  console.log( "Here we are processing the save for, title: '" + selected.title.value + 
+             "' summary: '" + selected.attributes["summary"].value + "' link: '" +  selected.attributes[3].value + "'" );
+  // Make an AJAX GET request to save this article to the db
   $.ajax({
-    type: "GET",
+    type: "POST",
     dataType: "json",
-    url: "/clearall",
+    url: "/save/" + selected.attr( "data-id" ) + "/" + this.dataTitle + "/" + this.dataSumary + "/" + this.dataLink,
+
     // On a successful call, clear the #results section
     success: function( response ) {
       $( "#results" ).empty();
